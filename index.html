@@ -54,6 +54,8 @@ svg text{font-family:var(--text);fill:var(--ink-2)}
 .sub{fill:var(--clip);fill-opacity:.5}.off{fill:var(--clip);fill-opacity:.7}
 .best{fill:none;stroke:var(--agent);stroke-width:2.2;stroke-linejoin:round}
 .ref{stroke:var(--clip);stroke-width:1.2;stroke-dasharray:3 4}
+.refline{fill:none;stroke:var(--clip);stroke-width:1.6}.ptlab{font-size:11.5px;fill:var(--ink-3)}
+.m-b5{fill:var(--page);stroke:var(--clip);stroke-width:2}
 .finds{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:8px 56px;margin:26px 0 0;padding:0;list-style:none}
 .finds li{border-top:1px solid var(--line);padding:16px 0 6px}
 .finds b{display:block;font:600 17px/1.4 var(--text);margin-bottom:4px}
@@ -87,14 +89,155 @@ footer{margin:96px 0 60px;color:var(--ink-3);font-size:14px}
 
 <div class="col">
 <h1><span data-lang="zh">给每个模型写一套专属的量化方法</span><span data-lang="en">A quantization method written for each model</span></h1>
-<p class="lede"><span data-lang="zh">通用的量化方法对所有模型用同一套流程。这里换一种做法：让一个编程 agent 拿着某个模型，在 GPU 上反复试、看分数、改代码，约 4 小时后留下一套只属于这个模型的 3-bit 量化方法。Qwen3-0.6B 上，通用方法只保住原模型 23% 的任务准确率，agent 的方法保住 54%；到了 Qwen3-8B，通用方法已经保住 94%，agent 的方法和它持平。</span><span data-lang="en">General quantization methods run one recipe on every model. Here a coding agent takes one model and tries, scores and rewrites code on GPUs for about four hours, leaving a 3-bit quantization method that belongs to that model alone. On Qwen3-0.6B the general method keeps 23% of the original model's task accuracy and the agent's method keeps 54%; on Qwen3-8B the general method already keeps 94% and the agent's method is level with it.</span></p>
+<p class="lede"><span data-lang="zh">通用的量化方法对所有模型用同一套流程。这里换一种做法：让一个编程 agent 拿着某个模型，在 GPU 上反复试、看分数、改代码，约 4 小时后留下一套只属于这个模型的 3-bit 量化方法。和我们自己实现的通用基线比，它在每个模型上都更接近原模型，模型越小差得越多。和大家实际下载的 GGUF 文件按同样大小比，目前只在最小的一档略好，4 GB 以上不如。</span><span data-lang="en">General quantization methods run one recipe on every model. Here a coding agent takes one model and tries, scores and rewrites code on GPUs for about four hours, leaving a 3-bit quantization method that belongs to that model alone. Against a general baseline of our own it comes closer to the original on every model, and more so the smaller the model. Against the GGUF files people actually download, at equal file size, it is slightly ahead only at the smallest size and behind above 4 GB.</span></p>
 <p class="meta"><span data-lang="zh">阶段性结果，2026-11-10 更新。5 个模型，3-bit 权重，不用梯度。</span><span data-lang="en">Interim results, updated 2026-11-10. Five models, 3-bit weights, no gradients.</span></p>
 </div>
 
 <section>
 <div class="col">
-<h2><span data-lang="zh">模型越小，专属方法补回来的越多</span><span data-lang="en">The smaller the model, the more a tailored method wins back</span></h2>
-<p><span data-lang="zh">把模型压到 3-bit 以后，它还剩多少本事？下面用 5 类没参与搜索的任务来量：每个任务上“量化后的准确率 ÷ 原模型的准确率”，再取平均。100% 就是没有损失。</span><span data-lang="en">How much ability is left after squeezing a model to 3 bits? Five kinds of task that took no part in the search measure it: accuracy after quantization divided by the original model's accuracy, averaged over tasks. 100% means nothing was lost.</span></p>
+<h2><span data-lang="zh">同样大小的文件：最小一档略好，再大不如 GGUF</span><span data-lang="en">At equal file size: slightly ahead at the smallest, behind GGUF above it</span></h2>
+<p><span data-lang="zh">用量化模型的人关心两件事：文件多大，质量多少。下面把 Qwen3-8B 的各种量化版本放在同一张图上：llama.cpp 的 GGUF 各档（Qwen 官方和 unsloth 发布的）、官方的 AWQ 4-bit，以及 agent 的 3-bit 权重。每个版本都把权重还原成浮点，用同一套评测打分。</span><span data-lang="en">People who use a quantized model care about two things: how big the file is and how good it is. Here every quantized version of Qwen3-8B sits on one chart: llama.cpp GGUF files (published by Qwen and by unsloth), the official AWQ 4-bit upload, and the agent's 3-bit weights. Each version has its weights written back as floats and is scored by the same evaluation.</span></p>
+</div>
+<figure>
+  <div class="legend"><span><svg viewBox="0 0 22 14"><circle cx="11" cy="7" r="5.5" class="m-clip"/></svg><span data-lang="zh">llama.cpp 的 GGUF 各档</span><span data-lang="en">llama.cpp GGUF files</span></span><span><svg viewBox="0 0 22 14"><rect x="6" y="2" width="10" height="10" class="m-clip"/></svg><span data-lang="zh">官方 AWQ 4-bit</span><span data-lang="en">official AWQ 4-bit</span></span><span><svg viewBox="0 0 22 14"><circle cx="11" cy="7" r="5.5" class="m-agent"/></svg><span data-lang="zh">agent 的 3-bit 权重</span><span data-lang="en">3-bit weights by the agent</span></span><span><svg viewBox="0 0 22 14"><circle cx="11" cy="7" r="5.5" class="m-b5"/></svg><span data-lang="zh">B5 + clip（我们实现的通用基线）</span><span data-lang="en">B5 + clip (our general baseline)</span></span></div>
+  <div class="scroll"><svg viewBox="0 0 960 618" role="img"><title>Qwen3-8B: quality against file size</title><text x="64.0" y="22.0" class="colhead" text-anchor="start" data-lang="zh">test S（越低越好）</text><text x="64.0" y="22.0" class="colhead" text-anchor="start" data-lang="en">test S (lower is better)</text><line x1="64" x2="936" y1="296.2" y2="296.2" class="grid"/><text x="56.0" y="300.2" class="tick" text-anchor="end">0.001</text><line x1="64" x2="936" y1="195.2" y2="195.2" class="grid"/><text x="56.0" y="199.2" class="tick" text-anchor="end">0.01</text><line x1="64" x2="936" y1="94.2" y2="94.2" class="grid"/><text x="56.0" y="98.2" class="tick" text-anchor="end">0.1</text><line x1="64.0" x2="64.0" y1="46" y2="306" class="grid"/><text x="64.0" y="322.0" class="tick" text-anchor="middle">3 GB</text><line x1="281.6" x2="281.6" y1="46" y2="306" class="grid"/><text x="281.6" y="322.0" class="tick" text-anchor="middle">4 GB</text><line x1="450.4" x2="450.4" y1="46" y2="306" class="grid"/><text x="450.4" y="322.0" class="tick" text-anchor="middle">5 GB</text><line x1="588.4" x2="588.4" y1="46" y2="306" class="grid"/><text x="588.4" y="322.0" class="tick" text-anchor="middle">6 GB</text><line x1="705.0" x2="705.0" y1="46" y2="306" class="grid"/><text x="705.0" y="322.0" class="tick" text-anchor="middle">7 GB</text><line x1="806.0" x2="806.0" y1="46" y2="306" class="grid"/><text x="806.0" y="322.0" class="tick" text-anchor="middle">8 GB</text><line x1="895.1" x2="895.1" y1="46" y2="306" class="grid"/><text x="895.1" y="322.0" class="tick" text-anchor="middle">9 GB</text><path d="M131.9 65.9 L236.8 88.2 L304.8 113.5 L419.9 163.7 L454.6 156.3 L569.4 194.5 L674.8 228.5 L870.3 291.0" class="refline"/><path d="M154.4 88.4 L188.7 93.6 L221.5 94.9 L283.1 95.3" class="best"/><circle cx="131.9" cy="65.9" r="5.5" class="m-clip ring" data-tip="GGUF Q2_K
+3.28 GB
+test S 0.1907
+task accuracy kept 93.9%
+out-of-domain KL 0.281"/><text x="131.9" y="54.9" class="ptlab" text-anchor="middle">Q2_K</text><circle cx="236.8" cy="88.2" r="5.5" class="m-clip ring" data-tip="GGUF Q3_K_S
+3.77 GB
+test S 0.1148
+task accuracy kept 96.7%
+out-of-domain KL 0.157"/><text x="236.8" y="77.2" class="ptlab" text-anchor="middle">Q3_K_S</text><circle cx="304.8" cy="113.5" r="5.5" class="m-clip ring" data-tip="GGUF Q3_K_M
+4.12 GB
+test S 0.0645
+task accuracy kept 98.5%
+out-of-domain KL 0.089"/><text x="304.8" y="133.5" class="ptlab" text-anchor="middle">Q3_K_M</text><circle cx="419.9" cy="163.7" r="5.5" class="m-clip ring" data-tip="GGUF Q4_K_S
+4.80 GB
+test S 0.0205
+task accuracy kept 101.1%
+out-of-domain KL 0.028"/><text x="419.9" y="152.7" class="ptlab" text-anchor="middle">Q4_K_S</text><circle cx="454.6" cy="156.3" r="5.5" class="m-clip ring" data-tip="GGUF Q4_K_M
+5.03 GB
+test S 0.0243
+task accuracy kept 98.7%
+out-of-domain KL 0.034"/><text x="454.6" y="176.3" class="ptlab" text-anchor="middle">Q4_K_M</text><circle cx="569.4" cy="194.5" r="5.5" class="m-clip ring" data-tip="GGUF Q5_K_M
+5.85 GB
+test S 0.0102
+task accuracy kept 100.0%
+out-of-domain KL 0.013"/><text x="569.4" y="183.5" class="ptlab" text-anchor="middle">Q5_K_M</text><circle cx="674.8" cy="228.5" r="5.5" class="m-clip ring" data-tip="GGUF Q6_K
+6.73 GB
+test S 0.0047
+task accuracy kept 100.2%
+out-of-domain KL 0.006"/><text x="674.8" y="217.5" class="ptlab" text-anchor="middle">Q6_K</text><circle cx="870.3" cy="291.0" r="5.5" class="m-clip ring" data-tip="GGUF Q8_0
+8.71 GB
+test S 0.0011
+task accuracy kept 100.2%
+out-of-domain KL 0.001"/><text x="870.3" y="280.0" class="ptlab" text-anchor="middle">Q8_0</text><rect x="595.7" y="124.0" width="10" height="10" class="m-clip ring" data-tip="official AWQ 4-bit
+6.10 GB
+test S 0.0453
+task accuracy kept 98.5%
+out-of-domain KL 0.065"/><text x="610.7" y="133.0" class="ptlab" text-anchor="start">AWQ 4-bit</text><circle cx="154.4" cy="88.4" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 4 bits
+3.38 GB
+test S 0.1140
+task accuracy kept 94.6%
+out-of-domain KL 0.196"/><circle cx="188.7" cy="93.6" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 5 bits
+3.54 GB
+test S 0.1013
+task accuracy kept 95.1%
+out-of-domain KL 0.181"/><circle cx="221.5" cy="94.9" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 6 bits
+3.69 GB
+test S 0.0984
+task accuracy kept 92.9%
+out-of-domain KL 0.177"/><circle cx="283.1" cy="95.3" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 8 bits
+4.01 GB
+test S 0.0974
+task accuracy kept 94.7%
+out-of-domain KL 0.176"/><text x="150.4" y="150.4" class="ptlab" text-anchor="start" data-lang="zh">agent 的权重，嵌入层 4 到 8 bit</text><text x="150.4" y="150.4" class="ptlab" text-anchor="start" data-lang="en">agent weights, embeddings at 4 to 8 bits</text><text x="494.4" y="99.5" class="ptlab" text-anchor="start" data-lang="zh">原格式</text><text x="494.4" y="99.5" class="ptlab" text-anchor="start" data-lang="en">as built</text><circle cx="483.4" cy="95.5" r="6" class="m-agent ring" data-tip="agent, as built (16-bit embeddings)
+5.22 GB
+test S 0.0972
+task accuracy kept 93.5%
+out-of-domain KL 0.176"/><circle cx="483.4" cy="77.9" r="6" class="m-b5" data-tip="B5 + clip, as built (16-bit embeddings)
+5.22 GB
+test S 0.1449
+task accuracy kept 93.9%
+out-of-domain KL 0.281"/><text x="64.0" y="360.0" class="colhead" text-anchor="start" data-lang="zh">保住的任务准确率（越高越好）</text><text x="64.0" y="360.0" class="colhead" text-anchor="start" data-lang="en">task accuracy kept (higher is better)</text><line x1="64" x2="936" y1="544.8" y2="544.8" class="grid"/><text x="56.0" y="548.8" class="tick" text-anchor="end">92%</text><line x1="64" x2="936" y1="486.3" y2="486.3" class="grid"/><text x="56.0" y="490.3" class="tick" text-anchor="end">96%</text><line x1="64" x2="936" y1="427.8" y2="427.8" class="full"/><text x="56.0" y="431.8" class="tick" text-anchor="end">100%</text><line x1="64.0" x2="64.0" y1="384" y2="574" class="grid"/><text x="64.0" y="590.0" class="tick" text-anchor="middle">3 GB</text><line x1="281.6" x2="281.6" y1="384" y2="574" class="grid"/><text x="281.6" y="590.0" class="tick" text-anchor="middle">4 GB</text><line x1="450.4" x2="450.4" y1="384" y2="574" class="grid"/><text x="450.4" y="590.0" class="tick" text-anchor="middle">5 GB</text><line x1="588.4" x2="588.4" y1="384" y2="574" class="grid"/><text x="588.4" y="590.0" class="tick" text-anchor="middle">6 GB</text><line x1="705.0" x2="705.0" y1="384" y2="574" class="grid"/><text x="705.0" y="590.0" class="tick" text-anchor="middle">7 GB</text><line x1="806.0" x2="806.0" y1="384" y2="574" class="grid"/><text x="806.0" y="590.0" class="tick" text-anchor="middle">8 GB</text><line x1="895.1" x2="895.1" y1="384" y2="574" class="grid"/><text x="895.1" y="590.0" class="tick" text-anchor="middle">9 GB</text><circle cx="131.9" cy="516.9" r="5.5" class="m-clip ring" data-tip="GGUF Q2_K
+3.28 GB
+test S 0.1907
+task accuracy kept 93.9%
+out-of-domain KL 0.281"/><text x="131.9" y="505.9" class="ptlab" text-anchor="middle">Q2_K</text><circle cx="236.8" cy="475.4" r="5.5" class="m-clip ring" data-tip="GGUF Q3_K_S
+3.77 GB
+test S 0.1148
+task accuracy kept 96.7%
+out-of-domain KL 0.157"/><text x="236.8" y="464.4" class="ptlab" text-anchor="middle">Q3_K_S</text><circle cx="304.8" cy="450.4" r="5.5" class="m-clip ring" data-tip="GGUF Q3_K_M
+4.12 GB
+test S 0.0645
+task accuracy kept 98.5%
+out-of-domain KL 0.089"/><text x="304.8" y="470.4" class="ptlab" text-anchor="middle">Q3_K_M</text><circle cx="419.9" cy="412.1" r="5.5" class="m-clip ring" data-tip="GGUF Q4_K_S
+4.80 GB
+test S 0.0205
+task accuracy kept 101.1%
+out-of-domain KL 0.028"/><text x="419.9" y="401.1" class="ptlab" text-anchor="middle">Q4_K_S</text><circle cx="454.6" cy="447.1" r="5.5" class="m-clip ring" data-tip="GGUF Q4_K_M
+5.03 GB
+test S 0.0243
+task accuracy kept 98.7%
+out-of-domain KL 0.034"/><text x="454.6" y="467.1" class="ptlab" text-anchor="middle">Q4_K_M</text><circle cx="569.4" cy="427.6" r="5.5" class="m-clip ring" data-tip="GGUF Q5_K_M
+5.85 GB
+test S 0.0102
+task accuracy kept 100.0%
+out-of-domain KL 0.013"/><text x="569.4" y="416.6" class="ptlab" text-anchor="middle">Q5_K_M</text><circle cx="674.8" cy="425.3" r="5.5" class="m-clip ring" data-tip="GGUF Q6_K
+6.73 GB
+test S 0.0047
+task accuracy kept 100.2%
+out-of-domain KL 0.006"/><text x="674.8" y="414.3" class="ptlab" text-anchor="middle">Q6_K</text><circle cx="870.3" cy="425.5" r="5.5" class="m-clip ring" data-tip="GGUF Q8_0
+8.71 GB
+test S 0.0011
+task accuracy kept 100.2%
+out-of-domain KL 0.001"/><text x="870.3" y="414.5" class="ptlab" text-anchor="middle">Q8_0</text><rect x="595.7" y="444.6" width="10" height="10" class="m-clip ring" data-tip="official AWQ 4-bit
+6.10 GB
+test S 0.0453
+task accuracy kept 98.5%
+out-of-domain KL 0.065"/><text x="610.7" y="453.6" class="ptlab" text-anchor="start">AWQ 4-bit</text><circle cx="154.4" cy="506.7" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 4 bits
+3.38 GB
+test S 0.1140
+task accuracy kept 94.6%
+out-of-domain KL 0.196"/><circle cx="188.7" cy="499.4" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 5 bits
+3.54 GB
+test S 0.1013
+task accuracy kept 95.1%
+out-of-domain KL 0.181"/><circle cx="221.5" cy="532.0" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 6 bits
+3.69 GB
+test S 0.0984
+task accuracy kept 92.9%
+out-of-domain KL 0.177"/><circle cx="283.1" cy="506.0" r="6" class="m-agent ring" data-tip="agent weights, embeddings at 8 bits
+4.01 GB
+test S 0.0974
+task accuracy kept 94.7%
+out-of-domain KL 0.176"/><text x="150.4" y="558.7" class="ptlab" text-anchor="start" data-lang="zh">agent 的权重，嵌入层 4 到 8 bit</text><text x="150.4" y="558.7" class="ptlab" text-anchor="start" data-lang="en">agent weights, embeddings at 4 to 8 bits</text><text x="494.4" y="526.6" class="ptlab" text-anchor="start" data-lang="zh">原格式</text><text x="494.4" y="526.6" class="ptlab" text-anchor="start" data-lang="en">as built</text><circle cx="483.4" cy="522.6" r="6" class="m-agent ring" data-tip="agent, as built (16-bit embeddings)
+5.22 GB
+test S 0.0972
+task accuracy kept 93.5%
+out-of-domain KL 0.176"/><circle cx="483.4" cy="517.5" r="6" class="m-b5" data-tip="B5 + clip, as built (16-bit embeddings)
+5.22 GB
+test S 0.1449
+task accuracy kept 93.9%
+out-of-domain KL 0.281"/></svg></div>
+  <figcaption><span data-lang="zh">横轴是文件大小（对数刻度）。上图是封存测试集上的 S，下图是 5 个任务上保住的准确率（每个点只跑了一次，上下一两个点的差别不能当真）。蓝线是同一份 agent 权重，只把输入嵌入层和输出层用最朴素的取整压到 8、6、5、4 bit：它不是任何推理引擎能直接加载的文件，只用来回答“这个大小能做到多好”。5.2 GB 处的两个点是按我们原来的格式（这两层保留 16 bit）存的。</span><span data-lang="en">The horizontal axis is file size (log scale). Top: S on the sealed test split. Bottom: task accuracy kept over five tasks (one run per point; a point or two up or down means nothing). The blue line is one set of agent weights with only the input embedding and the output layer rounded to 8, 6, 5 and 4 bits in the plainest way: no runtime loads such a file, it only answers how good a file of that size can be. The two points at 5.2 GB are stored in our original format, which keeps those two layers in 16 bits.</span></figcaption>
+</figure>
+<div class="col">
+<ul class="open">
+<li><b><span data-lang="zh">3.4 GB 附近，agent 的权重更好。</span><span data-lang="en">Near 3.4 GB the agent's weights are better.</span></b> <span data-lang="zh">S 是 0.114，旁边 3.3 GB 的 Q2_K 是 0.191；任务上保住 95% 对 94%，这个差别在噪声内。</span><span data-lang="en">S is 0.114 against 0.191 for Q2_K at 3.3 GB; task accuracy kept is 95% against 94%, a difference within the noise.</span></li>
+<li><b><span data-lang="zh">3.7 GB 附近，只在 S 上更好。</span><span data-lang="en">Near 3.7 GB they are better on S only.</span></b> <span data-lang="zh">S 是 0.098，Q3_K_S（3.8 GB）是 0.115。但在没参与搜索的域外文本上，KL 是 0.177 对 0.157，任务准确率是 93% 对 97%，都不占优。agent 是对着 S 优化的，它的优势目前只在 S 上。</span><span data-lang="en">S is 0.098 against 0.115 for Q3_K_S (3.8 GB). On out-of-domain text that took no part in the search, KL is 0.177 against 0.157, and task accuracy kept is 93% against 97%: no advantage on either. The agent optimized S, and for now S is where its advantage stops.</span></li>
+<li><b><span data-lang="zh">4 GB 以上，GGUF 明显更好。</span><span data-lang="en">Above 4 GB the GGUF files are clearly better.</span></b> <span data-lang="zh">Q3_K_M（4.1 GB）的 S 是 0.064。它把多出来的空间花在解码层上（每个权重 3.85 bit），而我们的格式固定是 3.15 bit，多出来的空间只能留给嵌入层，没有用处。</span><span data-lang="en">Q3_K_M (4.1 GB) reaches S 0.064. It spends the extra space on the decoder layers (3.85 bits per weight), while our format is fixed at 3.15 bits and can only leave the extra space to the embeddings, where it buys nothing.</span></li>
+<li><b><span data-lang="zh">我们原来的格式不是一个合理的选择。</span><span data-lang="en">Our original format is not a sensible choice.</span></b> <span data-lang="zh">它是 5.2 GB，S 0.097；同样大小的 Q4_K_M（5.0 GB）是 0.024，任务上几乎无损。</span><span data-lang="en">It takes 5.2 GB at S 0.097; Q4_K_M at the same size (5.0 GB) reaches 0.024 and loses almost nothing on tasks.</span></li>
+</ul>
+<p><span data-lang="zh">所以下面几节里“比通用基线好多少”的数字，参照的是我们自己实现的基线，不是社区的文件。它们说明 agent 能找到更好的取整方法，但要在同样大小下超过 GGUF，还得让它自己决定比特怎么分配，并且不只盯着 S。</span><span data-lang="en">So the numbers in the sections below, on how much better than the general baseline, refer to a baseline of our own, not to the community's files. They show that the agent finds better ways to round weights; to beat GGUF at equal size it must also decide where the bits go, and look beyond S.</span></p>
+</div>
+</section>
+
+<section>
+<div class="col">
+<h2><span data-lang="zh">和我们自己的基线比：模型越小，补回来的越多</span><span data-lang="en">Against our own baseline: the smaller the model, the more is won back</span></h2>
+<p><span data-lang="zh">Qwen3-0.6B 上，通用基线只保住原模型 23% 的任务准确率，agent 的方法保住 54%；到了 Qwen3-8B，基线已经保住 94%，agent 的方法和它持平。</span><span data-lang="en">On Qwen3-0.6B the general baseline keeps 23% of the original model's task accuracy and the agent's method keeps 54%; on Qwen3-8B the baseline already keeps 94% and the agent's method is level with it.</span> <span data-lang="zh">把模型压到 3-bit 以后，它还剩多少本事？下面用 5 类没参与搜索的任务来量：每个任务上“量化后的准确率 ÷ 原模型的准确率”，再取平均。100% 就是没有损失。</span><span data-lang="en">How much ability is left after squeezing a model to 3 bits? Five kinds of task that took no part in the search measure it: accuracy after quantization divided by the original model's accuracy, averaged over tasks. 100% means nothing was lost.</span></p>
 </div>
 <figure>
   <div class="legend"><span><svg viewBox="0 0 22 14"><circle cx="11" cy="7" r="5.5" class="m-clip"/></svg><span data-lang="zh">B5 + clip：最强的通用基线</span><span data-lang="en">B5 + clip, the strongest general baseline</span></span><span><svg viewBox="0 0 22 14"><circle cx="11" cy="7" r="5.5" class="m-agent"/></svg><span data-lang="zh">agent 为这个模型写的方法</span><span data-lang="en">the method the agent wrote for this model</span></span></div>
@@ -1335,7 +1478,7 @@ agent 16.4%"/></svg></div>
 <h2><span data-lang="zh">还没回答的</span><span data-lang="en">What is still open</span></h2>
 <ul class="open">
 <li><b><span data-lang="zh">大模型上还没有体现出优势。</span><span data-lang="en">No advantage yet on the larger model.</span></b> <span data-lang="zh">Qwen3-8B 上 S 低了 33%，但任务准确率和通用方法打平。专属方法要在大模型上有意义，得去通用方法明显掉点的地方：更低的比特数，或者更大、更新的模型。</span><span data-lang="en">On Qwen3-8B S is 33% lower, but task accuracy is level with the general method. For a tailored method to matter on large models it has to go where general methods clearly lose accuracy: fewer bits, or larger and newer models.</span></li>
-<li><b><span data-lang="zh">还没和大家实际下载的量化版本比。</span><span data-lang="en">No comparison yet with the quantized versions people actually download.</span></b> <span data-lang="zh">这里的基线是我们自己实现的通用方法。社区常用的 GGUF、AWQ 等 4-bit 版本还没有用同一套指标评过。</span><span data-lang="en">The baselines here are general methods in our own implementation. The community's usual 4-bit GGUF and AWQ versions have not been scored with the same metrics.</span></li>
+<li><b><span data-lang="zh">同样大小下还没有超过社区的文件。</span><span data-lang="en">Not yet ahead of the community's files at equal size.</span></b> <span data-lang="zh">下一步是让 agent 直接产出标准的 GGUF 和 AWQ 文件，在给定的文件大小内自己决定每一层用多少比特，并把域外文本和任务表现也纳入它优化的目标。只做了 Qwen3-8B 一个模型的对比。</span><span data-lang="en">Next the agent is to produce standard GGUF and AWQ files itself, decide within a given file size how many bits each layer gets, and optimize for out-of-domain text and task behaviour as well. The comparison covers one model, Qwen3-8B.</span></li>
 <li><b><span data-lang="zh">搜索只跑了计划的一半。</span><span data-lang="en">The search ran for half its planned time.</span></b> <span data-lang="zh">每个模型计划 8 小时，实际约 4 小时就停了，agent 没有收尾。3 个模型的最好提交是停下时还在排队、agent 自己没看到结果的。</span><span data-lang="en">Eight hours were planned per model; the runs stopped near four, without a closing turn. In 3 models the best submission was still queued at the stop, and the agent never saw its result.</span></li>
 <li><b><span data-lang="zh">专属方法会用满开发时的硬件。</span><span data-lang="en">A tailored method fills the hardware it was developed on.</span></b> <span data-lang="zh">Qwen3-8B 的最好方法是在 189 GB 显存的卡上写出来的，在 80 GB 的卡上跑不动。</span><span data-lang="en">The best method for Qwen3-8B was written on cards with 189 GB of memory and does not run on 80 GB cards.</span></li>
 </ul>
