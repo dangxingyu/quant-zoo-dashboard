@@ -89,9 +89,168 @@ footer{margin:96px 0 60px;color:var(--ink-3);font-size:14px}
 
 <div class="col">
 <h1><span data-lang="zh">给每个模型写一套专属的量化方法</span><span data-lang="en">A quantization method written for each model</span></h1>
-<p class="lede"><span data-lang="zh">通用的量化方法对所有模型用同一套流程。这里换一种做法：让一个编程 agent 拿着某个模型，在 GPU 上反复试、看分数、改代码，约 4 小时后留下一套只属于这个模型的 3-bit 量化方法。和我们自己实现的通用基线比，它在每个模型上都更接近原模型，模型越小差得越多。和大家实际下载的 GGUF 文件按同样大小比，目前只在最小的一档略好，4 GB 以上不如。</span><span data-lang="en">General quantization methods run one recipe on every model. Here a coding agent takes one model and tries, scores and rewrites code on GPUs for about four hours, leaving a 3-bit quantization method that belongs to that model alone. Against a general baseline of our own it comes closer to the original on every model, and more so the smaller the model. Against the GGUF files people actually download, at equal file size, it is slightly ahead only at the smallest size and behind above 4 GB.</span></p>
-<p class="meta"><span data-lang="zh">阶段性结果，2026-11-10 更新。5 个模型，3-bit 权重，不用梯度。</span><span data-lang="en">Interim results, updated 2026-11-10. Five models, 3-bit weights, no gradients.</span></p>
+<p class="lede"><span data-lang="zh">通用的量化方法对所有模型用同一套流程。这里换一种做法：让一个编程 agent 拿着某个模型，在 GPU 上反复试、看分数、改代码，约 4 小时后留下一套只属于这个模型的 3-bit 量化方法。和我们自己实现的通用基线比，它在每个模型上都更接近原模型，模型越小差得越多。和大家实际下载的文件比，结果分两种：用官方 AWQ 的 4-bit 格式时，同样大小下明显更好；和 GGUF 按同样大小比，目前只在最小的一档略好，4 GB 以上不如。</span><span data-lang="en">General quantization methods run one recipe on every model. Here a coding agent takes one model and tries, scores and rewrites code on GPUs for about four hours, leaving a 3-bit quantization method that belongs to that model alone. Against a general baseline of our own it comes closer to the original on every model, and more so the smaller the model. Against the files people actually download the picture splits: in the official AWQ 4-bit format it is clearly better at the same size; against GGUF at equal file size it is slightly ahead only at the smallest size and behind above 4 GB.</span></p>
+<p class="meta"><span data-lang="zh">阶段性结果，2026-11-11 更新。5 个模型的 3-bit，加上 Qwen3-8B 的 4-bit，不用梯度。</span><span data-lang="en">Interim results, updated 2026-11-11. Five models at 3 bits, plus Qwen3-8B at 4 bits; no gradients.</span></p>
 </div>
+
+<section>
+<div class="col">
+<h2><span data-lang="zh">用官方 AWQ 的格式：同样大小，S 低 45%</span><span data-lang="en">In the official AWQ format: same size, S 45% lower</span></h2>
+<p><span data-lang="zh">Qwen 官方发布的 Qwen3-8B AWQ 版本是 4-bit、每组 128 个权重、嵌入层保留 16 位，6.1 GB。我们的 4-bit 格式和它是同一种，文件一样大，所以可以直接比：同一个格式里，换一种取整方法能好多少。agent 在这个格式下搜索了 8 小时，交了 71 个提交。</span><span data-lang="en">The AWQ version of Qwen3-8B published by Qwen is 4-bit, groups of 128 weights, embeddings kept in 16 bits, 6.1 GB. Our 4-bit format is the same and the file is the same size, so the comparison is direct: within one format, how much does a different way of rounding buy. The agent searched in this format for 8 hours and made 71 submissions.</span></p>
+</div>
+<figure>
+  <div class="scroll"><svg viewBox="0 0 960 206" role="img"><title>S of each version</title><line x1="300.0" x2="300.0" y1="12" y2="176" class="grid"/><text x="300.0" y="194.0" class="tick" text-anchor="middle">0.02</text><line x1="438.8" x2="438.8" y1="12" y2="176" class="grid"/><text x="438.8" y="194.0" class="tick" text-anchor="middle">0.025</text><line x1="552.2" x2="552.2" y1="12" y2="176" class="grid"/><text x="552.2" y="194.0" class="tick" text-anchor="middle">0.03</text><line x1="731.2" x2="731.2" y1="12" y2="176" class="grid"/><text x="731.2" y="194.0" class="tick" text-anchor="middle">0.04</text><line x1="870.0" x2="870.0" y1="12" y2="176" class="grid"/><text x="870.0" y="194.0" class="tick" text-anchor="middle">0.05</text><text x="0.0" y="37.0" class="rowlab" text-anchor="start" data-lang="zh">官方 AWQ 4-bit</text><text x="0.0" y="37.0" class="rowlab" text-anchor="start" data-lang="en">official AWQ 4-bit</text><line x1="300" x2="799.3" y1="32.0" y2="32.0" class="grid"/><rect x="793.3" y="26.0" width="12" height="12" class="m-clip ring"/><text x="813.3" y="37.0" class="val" text-anchor="start">0.0446</text><text x="0.0" y="77.0" class="rowlab" text-anchor="start" data-lang="zh">B5（我们的通用基线）</text><text x="0.0" y="77.0" class="rowlab" text-anchor="start" data-lang="en">B5 (our general baseline)</text><line x1="300" x2="716.6" y1="72.0" y2="72.0" class="grid"/><circle cx="716.6" cy="72.0" r="7" class="m-b5"/><text x="730.6" y="77.0" class="val" text-anchor="start">0.0391</text><text x="0.0" y="117.0" class="rowlab" text-anchor="start" data-lang="zh">B5 + clip</text><text x="0.0" y="117.0" class="rowlab" text-anchor="start" data-lang="en">B5 + clip</text><line x1="300" x2="666.4" y1="112.0" y2="112.0" class="grid"/><circle cx="666.4" cy="112.0" r="7" class="m-clip ring"/><text x="680.4" y="117.0" class="val" text-anchor="start">0.0360</text><text x="0.0" y="157.0" class="rowlab" text-anchor="start" data-lang="zh">agent 的方法</text><text x="0.0" y="157.0" class="rowlab" text-anchor="start" data-lang="en">the agent&#x27;s method</text><line x1="300" x2="427.9" y1="152.0" y2="152.0" class="grid"/><circle cx="427.9" cy="152.0" r="7" class="m-agent ring"/><text x="441.9" y="157.0" class="val" text-anchor="start">0.0246</text></svg></div>
+  <figcaption><span data-lang="zh">验证集上的 S（对数轴，越低越好）。agent 的方法比官方 AWQ 低 45%，比我们自己的 B5 + clip 低 32%；B5 + clip 本身已经比官方 AWQ 低 19%。官方 AWQ 是在另一种 GPU 上评的，同一方法在两种硬件上的 S 相差约 1%。</span><span data-lang="en">S on the validation split (log axis, lower is better). The agent's method is 45% below the official AWQ upload and 32% below our own B5 + clip; B5 + clip is itself 19% below the official upload. The official upload was scored on another kind of GPU; the same method differs by about 1% in S between the two.</span></figcaption>
+</figure>
+<p class="small"><span data-lang="zh">这是验证集上的分数，agent 搜索时看得到。封存测试集、域外文本和下游任务的评测还在排队，出来后这一节会更新。</span><span data-lang="en">These are validation scores, which the agent saw while searching. The sealed test split, out-of-domain text and the downstream tasks are still queued; this section is updated when they finish.</span></p>
+<figure>
+  <div style="max-width:560px"><svg viewBox="0 0 470 280" role="img"><title>Qwen3-8B: every submission and the best so far</title><line x1="44" x2="378" y1="206.6" y2="206.6" class="grid"/><text x="37.0" y="210.6" class="tick" text-anchor="end">0.025</text><line x1="44" x2="378" y1="163.9" y2="163.9" class="grid"/><text x="37.0" y="167.9" class="tick" text-anchor="end">0.03</text><line x1="44" x2="378" y1="96.6" y2="96.6" class="grid"/><text x="37.0" y="100.6" class="tick" text-anchor="end">0.04</text><line x1="44" x2="378" y1="44.4" y2="44.4" class="grid"/><text x="37.0" y="48.4" class="tick" text-anchor="end">0.05</text><text x="44.0" y="263.0" class="tick" text-anchor="middle">0</text><text x="85.8" y="263.0" class="tick" text-anchor="middle">1 h</text><text x="127.5" y="263.0" class="tick" text-anchor="middle">2 h</text><text x="169.2" y="263.0" class="tick" text-anchor="middle">3 h</text><text x="211.0" y="263.0" class="tick" text-anchor="middle">4 h</text><text x="252.8" y="263.0" class="tick" text-anchor="middle">5 h</text><text x="294.5" y="263.0" class="tick" text-anchor="middle">6 h</text><text x="336.2" y="263.0" class="tick" text-anchor="middle">7 h</text><text x="378.0" y="263.0" class="tick" text-anchor="middle">8 h</text><line x1="44" x2="378" y1="246" y2="246" class="axis"/><line x1="44" x2="378" y1="121.0" y2="121.0" class="ref"/><text x="384.0" y="125.0" class="reflab" text-anchor="start">B5 + clip 0.036</text><circle cx="50.0" cy="102.5" r="2.6" class="sub" data-tip="s0001, 0.14 agent hours
+S 0.0390 (prefill 0.0357, decode 0.0423)
+B5 start"/><circle cx="56.1" cy="111.7" r="2.6" class="sub" data-tip="s0002, 0.29 agent hours
+S 0.0375 (prefill 0.0343, decode 0.0407)
+clip_mse + gptaq"/><circle cx="56.5" cy="159.1" r="2.6" class="sub" data-tip="s0004, 0.30 agent hours
+S 0.0306 (prefill 0.0336, decode 0.0277)
+clip_mse + calib mix fw/pg19/chat/gsm8k 64 each"/><circle cx="57.5" cy="136.4" r="2.6" class="sub" data-tip="s0003, 0.32 agent hours
+S 0.0338 (prefill 0.0314, decode 0.0361)
+clip_mse + nsamples 512"/><circle cx="65.8" cy="125.5" r="2.6" class="sub" data-tip="s0005, 0.52 agent hours
+S 0.0353 (prefill 0.0317, decode 0.0390)
+mypipe: search8 clip + cd2 + scale refit, fineweb128"/><path d="M62.9 40 L69.9 40 L66.4 33 Z" class="off" data-tip="s0006, 0.54 agent hours
+S 0.0528 (prefill 0.0448, decode 0.0608)
+mypipe: m1 + lm_head LS refit beta=1"/><circle cx="68.3" cy="177.9" r="2.6" class="sub" data-tip="s0007, 0.58 agent hours
+S 0.0283 (prefill 0.0316, decode 0.0249)
+mypipe(search8+cd2+refit) + calib fw160 chat160 pg19 48 gsm8k32 (2048)"/><circle cx="69.2" cy="171.0" r="2.6" class="sub" data-tip="s0008, 0.60 agent hours
+S 0.0291 (prefill 0.0321, decode 0.0261)
+mypipe + calib 128 each fw/chat/pg19/gsm8k (1M tok)"/><circle cx="69.2" cy="174.1" r="2.6" class="sub" data-tip="s0009, 0.60 agent hours
+S 0.0287 (prefill 0.0318, decode 0.0256)
+mypipe + calib fw128 chat128 gsm8k32 + pg19 16x8192"/><circle cx="69.2" cy="184.5" r="2.6" class="sub" data-tip="s0010, 0.60 agent hours
+S 0.0275 (prefill 0.0303, decode 0.0246)
+mypipe asym25 clip+cd2+refit, calib 2M tok: fw400 chat400 pg19 128 gsm8k96"/><circle cx="69.2" cy="187.5" r="2.6" class="sub" data-tip="s0011, 0.60 agent hours
+S 0.0271 (prefill 0.0302, decode 0.0240)
+mypipe asym25 clip+cd2+refit, calib 4M tok: fw800 chat800 pg19 256 gsm8k192"/><circle cx="69.2" cy="181.5" r="2.6" class="sub" data-tip="s0012, 0.60 agent hours
+S 0.0278 (prefill 0.0308, decode 0.0249)
+cA calib + asym25 grid + batched groups (control)"/><circle cx="69.2" cy="180.8" r="2.6" class="sub" data-tip="s0014, 0.60 agent hours
+S 0.0279 (prefill 0.0311, decode 0.0247)
+x0 + percdamp_down .05"/><circle cx="69.2" cy="152.9" r="2.6" class="sub" data-tip="s0013, 0.60 agent hours
+S 0.0315 (prefill 0.0350, decode 0.0279)
+x0 + asym LS target beta .5 ls_damp .1"/><circle cx="69.2" cy="112.3" r="2.6" class="sub" data-tip="s0015, 0.60 agent hours
+S 0.0374 (prefill 0.0414, decode 0.0334)
+x0 + resid target beta .5 beta_resid .5 ls_damp .1"/><circle cx="87.0" cy="186.7" r="2.6" class="sub" data-tip="s0016, 1.03 agent hours
+S 0.0272 (prefill 0.0304, decode 0.0240)
+best(asym25 cd2 refit, batched) + 8M tok calib fw1600 chat1400 pg19 512(split 8192) gsm8k360"/><circle cx="88.0" cy="197.9" r="2.6" class="sub" data-tip="s0017, 1.05 agent hours
+S 0.0259 (prefill 0.0292, decode 0.0227)
+A8 but chat/gsm8k as unpacked standalone records (all 4000/2000), padded buckets, masked H"/><circle cx="94.1" cy="186.0" r="2.6" class="sub" data-tip="s0018, 1.20 agent hours
+S 0.0273 (prefill 0.0295, decode 0.0251)
+best + whole tuning pool ~14M tok: fw4000 chat1400 pg19 1024(split) gsm8k360"/><circle cx="102.0" cy="185.8" r="2.6" class="sub" data-tip="s0019, 1.39 agent hours
+S 0.0273 (prefill 0.0301, decode 0.0245)
+A8 + weight/act smoothing a^.3/wmax^.3 per group (qkv,o,gu,down) chosen by held-out proxy GPTQ loss vs identity"/><circle cx="105.2" cy="209.1" r="2.6" class="sub" data-tip="s0020, 1.47 agent hours
+S 0.0247 (prefill 0.0278, decode 0.0217)
+B8 (unpacked records) + position-0 rows weighted x16 in H"/><circle cx="111.6" cy="204.7" r="2.6" class="sub" data-tip="s0021, 1.62 agent hours
+S 0.0252 (prefill 0.0283, decode 0.0221)
+B8 (unpacked records) + position-0 rows weighted x128 in H"/><circle cx="115.3" cy="194.7" r="2.6" class="sub" data-tip="s0022, 1.71 agent hours
+S 0.0263 (prefill 0.0294, decode 0.0232)
+B8 + per-group column order choice {H-diag act-order, colmax|W| order} by train loss for qkv/o/down"/><circle cx="123.9" cy="196.2" r="2.6" class="sub" data-tip="s0023, 1.91 agent hours
+S 0.0261 (prefill 0.0293, decode 0.0229)
+B8 with pg19 as 128 full 8192-token windows (val-like) instead of 512x2048 pieces"/><circle cx="124.9" cy="198.2" r="2.6" class="sub" data-tip="s0024, 1.94 agent hours
+S 0.0259 (prefill 0.0294, decode 0.0224)
+B8 + chat_rec/gsm8k_rec rows weighted 1.5 in H"/><circle cx="129.5" cy="209.8" r="2.6" class="sub" data-tip="s0025, 2.05 agent hours
+S 0.0247 (prefill 0.0278, decode 0.0215)
+B8 + first 4 positions weighted x16 in H"/><circle cx="138.5" cy="209.3" r="2.6" class="sub" data-tip="s0026, 2.26 agent hours
+S 0.0247 (prefill 0.0278, decode 0.0216)
+B8 + position-0 rows weighted x6 in H"/><circle cx="141.7" cy="208.8" r="2.6" class="sub" data-tip="s0027, 2.34 agent hours
+S 0.0248 (prefill 0.0279, decode 0.0216)
+B8 + position-0 rows weighted x40 in H"/><circle cx="146.9" cy="208.6" r="2.6" class="sub" data-tip="s0028, 2.47 agent hours
+S 0.0248 (prefill 0.0278, decode 0.0218)
+P16 + per-group order choice {hdiag, wrms(col RMS)} by pos0-weighted train loss, all groups"/><circle cx="147.4" cy="206.3" r="2.6" class="sub" data-tip="s0029, 2.48 agent hours
+S 0.0250 (prefill 0.0281, decode 0.0219)
+P16 + q_proj quantized separately with H excluding position-0 rows (sink query irrelevant); k,v keep x16"/><circle cx="162.0" cy="208.2" r="2.6" class="sub" data-tip="s0030, 2.83 agent hours
+S 0.0248 (prefill 0.0278, decode 0.0219)
+P16c4 (first 4 pos x16) + 4 CD sweeps"/><circle cx="165.0" cy="208.9" r="2.6" class="sub" data-tip="s0031, 2.90 agent hours
+S 0.0248 (prefill 0.0278, decode 0.0217)
+P16c4 + massive-activation tokens (layer-input residual norm &gt; 20x median, pos&gt;=4) weighted x16 in H"/><circle cx="165.2" cy="209.1" r="2.6" class="sub" data-tip="s0032, 2.90 agent hours
+S 0.0247 (prefill 0.0279, decode 0.0215)
+P16c4 but pos0 weighting only in the qkv group H (o, gate/up, down unweighted) - where does the sink gain come from"/><circle cx="165.9" cy="207.5" r="2.6" class="sub" data-tip="s0033, 2.92 agent hours
+S 0.0249 (prefill 0.0280, decode 0.0218)
+P16c4 seed 1 (replicate)"/><circle cx="165.9" cy="207.2" r="2.6" class="sub" data-tip="s0034, 2.92 agent hours
+S 0.0249 (prefill 0.0277, decode 0.0222)
+P16c4 + token rows weighted by FP KL-sensitivity g=1-sum p^2 at scored positions (+0.5 mean g floor)"/><circle cx="165.9" cy="208.7" r="2.6" class="sub" data-tip="s0035, 2.92 agent hours
+S 0.0248 (prefill 0.0279, decode 0.0216)
+pos0 (first 4) weight x64 only in qkv H (others x1)"/><circle cx="185.8" cy="208.0" r="2.6" class="sub" data-tip="s0036, 3.40 agent hours
+S 0.0249 (prefill 0.0278, decode 0.0219)
+P16c4 seed 2 (replicate)"/><circle cx="187.7" cy="206.8" r="2.6" class="sub" data-tip="s0039, 3.44 agent hours
+S 0.0250 (prefill 0.0281, decode 0.0218)
+B8 + position weights 1+15/(1+p) in all H (decaying profile instead of first-4 x16)"/><circle cx="189.2" cy="209.9" r="2.6" class="sub" data-tip="s0038, 3.48 agent hours
+S 0.0246 (prefill 0.0277, decode 0.0216)
+P16c4 + QK-norm-aware H for q/k, head-averaged token weights 1/ms (one H per linear), stride 1"/><circle cx="192.0" cy="209.5" r="2.6" class="sub" data-tip="s0037, 3.55 agent hours
+S 0.0247 (prefill 0.0277, decode 0.0217)
+P16c4 + QK-norm-aware per-head H for q/k (token weight 1/ms of head output, cap 50x), stride 2"/><circle cx="203.6" cy="207.6" r="2.6" class="sub" data-tip="s0040, 3.82 agent hours
+S 0.0249 (prefill 0.0279, decode 0.0219)
+P16c4 + residual-norm-aware H for o_proj/down_proj: token rows weighted 1/ms(residual) (next RMSNorm divides error by rms)"/><circle cx="206.9" cy="209.9" r="2.6" class="sub" data-tip="s0041, 3.90 agent hours
+S 0.0247 (prefill 0.0276, decode 0.0217)
+P16c4 + gate/up each with own SiLU-sensitivity token-weighted H (w_up=sum_j silu(g)^2 c_j, w_gate=sum_j (silu&#x27;(g) u)^2 c_j, c=down col norm^2)"/><circle cx="212.1" cy="208.3" r="2.6" class="sub" data-tip="s0043, 4.03 agent hours
+S 0.0248 (prefill 0.0279, decode 0.0217)
+P16c4 + 64 full 8192-token pg19 windows (rows not used by the 2048 pieces) for long-position calibration"/><circle cx="214.8" cy="210.4" r="2.6" class="sub" data-tip="s0042, 4.09 agent hours
+S 0.0246 (prefill 0.0276, decode 0.0216)
+QKN (per-head, stride 2) + v_proj per-kv-head H weighted by attention received (sum_q a^2, /mean, cap 8, +0.25 floor; pos&lt;4 =1)"/><circle cx="221.6" cy="202.5" r="2.6" class="sub" data-tip="s0045, 4.25 agent hours
+S 0.0254 (prefill 0.0287, decode 0.0222)
+KS with richer candidates: qkv {hdiag, wrms, hdiag pos0x64}, o/gu {hdiag, wrms}, down {hdiag, wrms, hdiag damp .05}; 40k held-out tokens"/><circle cx="227.9" cy="208.6" r="2.6" class="sub" data-tip="s0044, 4.40 agent hours
+S 0.0248 (prefill 0.0279, decode 0.0217)
+P16c4 + per-group choice {hdiag, wrms order} by held-out END-TO-END KL (48k tokens, later layers FP)"/><circle cx="240.4" cy="210.4" r="2.6" class="sub" data-tip="s0046, 4.70 agent hours
+S 0.0246 (prefill 0.0276, decode 0.0216)
+VA seed 1 (replicate of s0042 .024596)"/><circle cx="252.7" cy="210.2" r="2.6" class="sub" data-tip="s0047, 5.00 agent hours
+S 0.0246 (prefill 0.0276, decode 0.0216)
+KS3: KL-choice only where differences are real (chaos floor): gu {hdiag, wrms, wrms_hin, damp .05}, down {hdiag, wrms, wrms_hin}; qkv/o fixed hdiag"/><circle cx="253.7" cy="210.4" r="2.6" class="sub" data-tip="s0048, 5.02 agent hours
+S 0.0246 (prefill 0.0276, decode 0.0216)
+VA without QK-norm weights (q/k plain H): v per-kv-head H weighted by attention received (cap 8, floor .25)"/><circle cx="253.8" cy="210.2" r="2.6" class="sub" data-tip="s0049, 5.03 agent hours
+S 0.0246 (prefill 0.0274, decode 0.0218)
+VA + k rows also weighted by attention received (k weight = 1/ms * ar)"/><circle cx="257.6" cy="208.1" r="2.6" class="sub" data-tip="s0050, 5.12 agent hours
+S 0.0248 (prefill 0.0279, decode 0.0218)
+P16c4 + sink-drift correction: qkv target uses FP-stream inputs at the first 4 positions (LS target W + H^-1 D0 W, D0 = sum_sink w xq (xfp - xq)^T)"/><circle cx="278.0" cy="209.2" r="2.6" class="sub" data-tip="s0051, 5.60 agent hours
+S 0.0247 (prefill 0.0278, decode 0.0216)
+VAF: VA v-weighting only (q/k plain single H), v H from all batches (stride 1)"/><circle cx="278.3" cy="207.8" r="2.6" class="sub" data-tip="s0052, 5.61 agent hours
+S 0.0249 (prefill 0.0279, decode 0.0218)
+VAF with va_cap 32 (more weight on highly attended tokens)"/><circle cx="282.3" cy="207.0" r="2.6" class="sub" data-tip="s0053, 5.71 agent hours
+S 0.0250 (prefill 0.0280, decode 0.0219)
+VAF with va_floor 0.05 (less weight on tokens nobody attends to)"/><circle cx="283.8" cy="210.4" r="2.6" class="sub" data-tip="s0054, 5.74 agent hours
+S 0.0246 (prefill 0.0275, decode 0.0217)
+VA seed 2 (replicate; P16c4 seed 2 = .024854)"/><circle cx="299.7" cy="209.4" r="2.6" class="sub" data-tip="s0057, 6.12 agent hours
+S 0.0247 (prefill 0.0278, decode 0.0216)
+P16c4 seed 3 (paired replicate)"/><circle cx="302.6" cy="209.8" r="2.6" class="sub" data-tip="s0055, 6.20 agent hours
+S 0.0247 (prefill 0.0276, decode 0.0217)
+VAF + residual writers (o, gate/up, down) token rows weighted 1 + 0.5*min(AR/mean, 8) (AR = attention received, head-avg, same layer)"/><circle cx="303.5" cy="210.7" r="2.6" class="sub" data-tip="s0056, 6.21 agent hours
+S 0.0246 (prefill 0.0276, decode 0.0215)
+VA seed 3 (paired replicate)"/><circle cx="309.1" cy="210.0" r="2.6" class="sub" data-tip="s0058, 6.35 agent hours
+S 0.0246 (prefill 0.0277, decode 0.0216)
+VA (exact base, stride 2) with va_cap 4 (milder AR weighting)"/><circle cx="324.6" cy="210.1" r="2.6" class="sub" data-tip="s0059, 6.72 agent hours
+S 0.0246 (prefill 0.0277, decode 0.0216)
+VM: v_proj exact attention-output H per kv head: sum_q xbar xbar^T, xbar_q = sum_t a_qt x_t (q/k plain single H, stride 2)"/><circle cx="326.8" cy="207.9" r="2.6" class="sub" data-tip="s0060, 6.77 agent hours
+S 0.0249 (prefill 0.0279, decode 0.0218)
+VM + blend with trace-matched plain H (1:1)"/><circle cx="328.0" cy="209.1" r="2.6" class="sub" data-tip="s0061, 6.80 agent hours
+S 0.0247 (prefill 0.0277, decode 0.0218)
+VM seed 1"/><circle cx="333.7" cy="209.9" r="2.6" class="sub" data-tip="s0062, 6.94 agent hours
+S 0.0246 (prefill 0.0278, decode 0.0215)
+VMb seed 1"/><circle cx="334.3" cy="209.7" r="2.6" class="sub" data-tip="s0063, 6.95 agent hours
+S 0.0247 (prefill 0.0275, decode 0.0218)
+VA with va_floor 0.5"/><circle cx="334.3" cy="210.2" r="2.6" class="sub" data-tip="s0064, 6.95 agent hours
+S 0.0246 (prefill 0.0277, decode 0.0215)
+VAf5 seed 1 (paired with VA s1 .024591)"/><circle cx="334.3" cy="210.2" r="2.6" class="sub" data-tip="s0065, 6.95 agent hours
+S 0.0246 (prefill 0.0276, decode 0.0216)
+VA (exact base, stride 2) + o/gu/down rows weighted 1+0.5*min(AR/mean,8) (AR available on even batches)"/><circle cx="334.3" cy="208.8" r="2.6" class="sub" data-tip="s0066, 6.95 agent hours
+S 0.0248 (prefill 0.0276, decode 0.0220)
+VAR2 seed 1 (paired with VA s1 .024591)"/><circle cx="351.8" cy="207.8" r="2.6" class="sub" data-tip="s0068, 7.37 agent hours
+S 0.0249 (prefill 0.0279, decode 0.0218)
+P16c4 seed 4 (paired with VA s4)"/><circle cx="359.1" cy="210.1" r="2.6" class="sub" data-tip="s0069, 7.55 agent hours
+S 0.0246 (prefill 0.0277, decode 0.0216)
+final method (VA) seed 5"/><circle cx="359.3" cy="208.5" r="2.6" class="sub" data-tip="s0067, 7.55 agent hours
+S 0.0248 (prefill 0.0276, decode 0.0219)
+final method (VA) seed 4"/><circle cx="359.6" cy="210.3" r="2.6" class="sub" data-tip="s0070, 7.56 agent hours
+S 0.0246 (prefill 0.0276, decode 0.0216)
+VAo seed 1 (is the QK-norm part needed? VA s1 .024591)"/><circle cx="372.5" cy="208.3" r="2.6" class="sub" data-tip="s0071, 7.87 agent hours
+S 0.0248 (prefill 0.0280, decode 0.0216)
+P16c4 seed 5 (paired with VA s5)"/><path d="M50.0 102.5 L56.1 102.5 L56.1 111.7 L56.5 111.7 L56.5 159.1 L68.3 159.1 L68.3 177.9 L69.2 177.9 L69.2 184.5 L69.2 184.5 L69.2 187.5 L88.0 187.5 L88.0 197.9 L105.2 197.9 L105.2 209.1 L129.5 209.1 L129.5 209.8 L189.2 209.8 L189.2 209.9 L214.8 209.9 L214.8 210.4 L240.4 210.4 L240.4 210.4 L303.5 210.4 L303.5 210.7 L372.5 210.7" class="best"/><circle cx="372.5" cy="210.7" r="4.5" class="m-agent ring"/><text x="381.5" y="214.7" class="val" text-anchor="start">0.025</text><text x="44.0" y="18.0" class="ptitle" text-anchor="start">Qwen3-8B</text><text x="378.0" y="18.0" class="note" text-anchor="end" data-lang="zh">71 次提交</text><text x="378.0" y="18.0" class="note" text-anchor="end" data-lang="en">71 submissions</text></svg></div>
+  <figcaption><span data-lang="zh">这次搜索的过程。大部分进步在前 3 个小时，之后 5 个小时基本没有再降。</span><span data-lang="en">The search itself. Most of the gain comes within the first 3 hours; the 5 hours after that bring almost nothing.</span></figcaption>
+</figure>
+</section>
+
 
 <section>
 <div class="col">
